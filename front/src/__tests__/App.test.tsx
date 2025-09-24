@@ -2,6 +2,7 @@ import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { describe, it, expect, vi } from 'vitest';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { ConfigProvider } from 'antd';
 import App from '../App';
 
 // Wrapper pour fournir le QueryClient
@@ -15,9 +16,11 @@ const createWrapper = () => {
   });
 
   return ({ children }: { children: React.ReactNode }) => (
-    <QueryClientProvider client={queryClient}>
-      {children}
-    </QueryClientProvider>
+    <ConfigProvider theme={{ token: { colorBgBase: '#000000' } }}>
+      <QueryClientProvider client={queryClient}>
+        {children}
+      </QueryClientProvider>
+    </ConfigProvider>
   );
 };
 
@@ -25,16 +28,16 @@ describe('App Integration', () => {
   it('renders the chat interface', () => {
     render(<App />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('ShodoBot - Assistant IA')).toBeInTheDocument();
-    expect(screen.getByText('Posez-moi vos questions !')).toBeInTheDocument();
+    expect(screen.getByText('ShodoBot')).toBeInTheDocument();
+    expect(screen.getByText('Assistant IA Shodo')).toBeInTheDocument();
     expect(screen.getByPlaceholderText('Tapez votre message...')).toBeInTheDocument();
-    expect(screen.getByRole('button', { name: 'Envoyer' })).toBeInTheDocument();
+    expect(screen.getByRole('button')).toBeInTheDocument();
   });
 
   it('displays welcome message initially', () => {
     render(<App />, { wrapper: createWrapper() });
 
-    expect(screen.getByText('Bienvenue ! Comment puis-je vous aider aujourd\'hui ?')).toBeInTheDocument();
+    expect(screen.getByText('Bienvenue sur ShodoBot')).toBeInTheDocument();
   });
 
   it('allows user to send a message', async () => {
@@ -42,7 +45,7 @@ describe('App Integration', () => {
     render(<App />, { wrapper: createWrapper() });
 
     const input = screen.getByPlaceholderText('Tapez votre message...');
-    const button = screen.getByRole('button', { name: 'Envoyer' });
+    const button = screen.getByRole('button');
 
     await user.type(input, 'Hello, how are you?');
     await user.click(button);
@@ -56,7 +59,7 @@ describe('App Integration', () => {
     render(<App />, { wrapper: createWrapper() });
 
     const input = screen.getByPlaceholderText('Tapez votre message...');
-    const button = screen.getByRole('button', { name: 'Envoyer' });
+    const button = screen.getByRole('button');
 
     await user.type(input, 'Test message');
     await user.click(button);
@@ -70,7 +73,7 @@ describe('App Integration', () => {
     render(<App />, { wrapper: createWrapper() });
 
     const input = screen.getByPlaceholderText('Tapez votre message...');
-    const button = screen.getByRole('button', { name: 'Envoyer' });
+    const button = screen.getByRole('button');
 
     await user.type(input, 'Test message');
     await user.click(button);
@@ -94,11 +97,11 @@ describe('App Integration', () => {
     const user = userEvent.setup();
     render(<App />, { wrapper: createWrapper() });
 
-    const button = screen.getByRole('button', { name: 'Envoyer' });
+    const button = screen.getByRole('button');
     await user.click(button);
 
     // Le message de bienvenue devrait toujours être visible
-    expect(screen.getByText('Bienvenue ! Comment puis-je vous aider aujourd\'hui ?')).toBeInTheDocument();
+    expect(screen.getByText('Bienvenue sur ShodoBot')).toBeInTheDocument();
   });
 
   it('disables input during loading', async () => {
@@ -106,7 +109,7 @@ describe('App Integration', () => {
     render(<App />, { wrapper: createWrapper() });
 
     const input = screen.getByPlaceholderText('Tapez votre message...');
-    const button = screen.getByRole('button', { name: 'Envoyer' });
+    const button = screen.getByRole('button');
 
     await user.type(input, 'Test message');
     await user.click(button);
@@ -148,6 +151,6 @@ describe('App Integration', () => {
     const { container } = render(<App />, { wrapper: createWrapper() });
 
     const mainContainer = container.firstChild as HTMLElement;
-    expect(mainContainer).toHaveClass('min-h-screen', 'bg-gray-100', 'py-8');
+    expect(mainContainer).toHaveStyle('background: #000000');
   });
 });
