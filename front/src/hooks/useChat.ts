@@ -25,12 +25,25 @@ export const useChat = () => {
     setError(null);
 
     try {
-      // TODO: Replace with actual API call
-      // For now, simulate a response
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const response = await fetch('/api/message', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ message: content }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Erreur HTTP: ${response.status}`);
+      }
+
+      const data = await response.json();
       
-      const response = `Je reçois votre message: "${content}". Pour l'instant, je suis en mode simulation. L'intégration avec l'API backend sera ajoutée prochainement !`;
-      addMessage(response, 'assistant');
+      if (data.success) {
+        addMessage(data.message, 'assistant');
+      } else {
+        throw new Error(data.message || 'Erreur inconnue du serveur');
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Une erreur est survenue');
     } finally {
