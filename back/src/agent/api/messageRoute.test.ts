@@ -1,33 +1,18 @@
+import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import Fastify, { FastifyInstance } from 'fastify';
-import app from './app';
+import { messageRoute } from './messageRoute';
 
-describe('App Integration', () => {
+describe('messageRoute', () => {
   let fastify: FastifyInstance;
 
   beforeAll(async () => {
     fastify = Fastify();
-    await fastify.register(app);
+    await fastify.register(messageRoute);
     await fastify.ready();
   });
 
   afterAll(async () => {
     await fastify.close();
-  });
-
-  describe('GET /health', () => {
-    it('should return health status', async () => {
-      const response = await fastify.inject({
-        method: 'GET',
-        url: '/health'
-      });
-
-      expect(response.statusCode).toBe(200);
-      expect(JSON.parse(response.body)).toEqual({
-        success: true,
-        message: 'Server is running',
-        timestamp: expect.any(String)
-      });
-    });
   });
 
   describe('POST /api/message', () => {
@@ -124,20 +109,31 @@ describe('App Integration', () => {
       expect(body.success).toBe(false);
       expect(body.message).toBe('Message contains potentially dangerous content');
     });
-  });
 
-  describe('404 handler', () => {
-    it('should return 404 for unknown routes', async () => {
+    it('should reject message with javascript protocol', async () => {
       const response = await fastify.inject({
-        method: 'GET',
-        url: '/unknown-route'
+        method: 'POST',
+        url: '/api/message',
+        payload: { message: 'javascript:alert("xss")' }
       });
 
-      expect(response.statusCode).toBe(404);
-      expect(JSON.parse(response.body)).toEqual({
-        success: false,
-        message: 'Route not found'
+      expect(response.statusCode).toBe(400);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.message).toBe('Message contains potentially dangerous content');
+    });
+
+    it('should reject message with event handler', async () => {
+      const response = await fastify.inject({
+        method: 'POST',
+        url: '/api/message',
+        payload: { message: 'Hello onclick="alert(\'xss\')"' }
       });
+
+      expect(response.statusCode).toBe(400);
+      const body = JSON.parse(response.body);
+      expect(body.success).toBe(false);
+      expect(body.message).toBe('Message contains potentially dangerous content');
     });
   });
 });
