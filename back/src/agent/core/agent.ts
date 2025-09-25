@@ -66,7 +66,7 @@ export async function processMessage(message: string): Promise<string> {
     history.addMessage(userMessage);
 
     // Détecter si l'utilisateur demande une recherche Notion
-    const notionKeywords = ['notion', 'recherche', 'cherche', 'trouve', 'document', 'page'];
+    const notionKeywords = ['notion', 'recherche', 'cherche', 'trouve', 'document', 'page', 'liste', 'wiki', 'espace'];
     const shouldSearchNotion = notion && notionKeywords.some(keyword => 
       message.toLowerCase().includes(keyword)
     );
@@ -74,27 +74,36 @@ export async function processMessage(message: string): Promise<string> {
     let notionResults = '';
     if (shouldSearchNotion) {
       try {
-        const searchQuery = message.replace(/notion|recherche|cherche|trouve|document|page/gi, '').trim();
-        if (searchQuery) {
-          const results = await notion!.searchAll(searchQuery, 5);
-          if (results.length > 0) {
-            notionResults = '\n\n📝 Résultats de recherche Notion:\n';
-            results.forEach((result, index) => {
-              notionResults += `${index + 1}. **${result.title}**\n`;
-              notionResults += `   - Type: ${result.object}\n`;
-              notionResults += `   - URL: ${result.url}\n`;
-              if (result.content) {
-                notionResults += `   - Contenu: ${result.content.substring(0, 200)}...\n`;
-              }
-              notionResults += '\n';
-            });
-          } else {
-            notionResults = '\n\n📝 Aucun résultat trouvé dans Notion pour cette recherche.';
-          }
+        // Utiliser le message complet comme requête de recherche
+        const searchQuery = message.trim();
+        console.log('🔍 Recherche Notion pour:', searchQuery);
+        
+        const results = await notion!.searchAll(searchQuery, 10);
+        console.log('📊 Nombre de résultats Notion:', results.length);
+        
+        if (results.length > 0) {
+          notionResults = '\n\n📝 **Résultats de recherche Notion:**\n\n';
+          results.forEach((result, index) => {
+            notionResults += `**${index + 1}. ${result.title}**\n`;
+            notionResults += `   • Type: ${result.object}\n`;
+            notionResults += `   • URL: ${result.url}\n`;
+            if (result.content) {
+              // Préserver les retours à la ligne dans le contenu
+              const formattedContent = result.content
+                .substring(0, 300)
+                .replace(/\n/g, '\n      ') // Indenter les nouvelles lignes
+                .trim();
+              notionResults += `   • Contenu:\n      ${formattedContent}...\n`;
+            }
+            notionResults += '\n';
+          });
+        } else {
+          notionResults = '\n\n📝 **Aucun résultat trouvé dans Notion pour cette recherche.**\n';
+          notionResults += '💡 Vérifiez que l\'intégration Notion a accès à vos pages.\n';
         }
       } catch (error) {
         console.error('Error searching Notion:', error);
-        notionResults = '\n\n📝 Erreur lors de la recherche dans Notion.';
+        notionResults = '\n\n📝 Erreur lors de la recherche dans Notion: ' + (error instanceof Error ? error.message : String(error));
       }
     }
 

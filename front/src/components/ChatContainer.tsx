@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Card, Typography, Space, Spin, Alert, Input, Button } from 'antd';
 import { SendOutlined, RobotOutlined } from '@ant-design/icons';
 import type { Message } from '../types/chat';
+import MarkdownRenderer from './MarkdownRenderer';
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -92,7 +93,11 @@ const ChatContainer: React.FC<ChatContainerProps> = ({
                     wordWrap: 'break-word'
                   }}
                 >
-                  <Text style={{ color: 'white' }}>{message.content}</Text>
+                  {message.role === 'assistant' ? (
+                    <MarkdownRenderer content={message.content} />
+                  ) : (
+                    <Text style={{ color: 'white' }}>{message.content}</Text>
+                  )}
                   <div style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
                     {message.timestamp.toLocaleTimeString('fr-FR', { 
                       hour: '2-digit', 

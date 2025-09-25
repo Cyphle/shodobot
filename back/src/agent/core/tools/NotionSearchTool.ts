@@ -146,12 +146,32 @@ export class NotionSearchTool {
           return block.paragraph.rich_text
             .map((text: any) => text.plain_text || '')
             .join('');
+        } else if (block.type === 'heading_1' && block.heading_1?.rich_text) {
+          return '\n# ' + block.heading_1.rich_text
+            .map((text: any) => text.plain_text || '')
+            .join('') + '\n';
+        } else if (block.type === 'heading_2' && block.heading_2?.rich_text) {
+          return '\n## ' + block.heading_2.rich_text
+            .map((text: any) => text.plain_text || '')
+            .join('') + '\n';
+        } else if (block.type === 'heading_3' && block.heading_3?.rich_text) {
+          return '\n### ' + block.heading_3.rich_text
+            .map((text: any) => text.plain_text || '')
+            .join('') + '\n';
+        } else if (block.type === 'bulleted_list_item' && block.bulleted_list_item?.rich_text) {
+          return '\n• ' + block.bulleted_list_item.rich_text
+            .map((text: any) => text.plain_text || '')
+            .join('');
+        } else if (block.type === 'numbered_list_item' && block.numbered_list_item?.rich_text) {
+          return '\n1. ' + block.numbered_list_item.rich_text
+            .map((text: any) => text.plain_text || '')
+            .join('');
         }
         return '';
       })
       .filter(text => text.length > 0)
-      .join(' ')
-      .substring(0, 500); // Limiter la longueur
+      .join('')
+      .substring(0, 800); // Augmenter la limite pour plus de contenu
   }
 
   /**
