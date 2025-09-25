@@ -24,6 +24,10 @@ jest.mock('./config/config', () => ({
     server: {
       port: 3001,
       host: '0.0.0.0'
+    },
+    notion: {
+      enabled: true,
+      apiKey: 'test-notion-api-key'
     }
   }
 }));

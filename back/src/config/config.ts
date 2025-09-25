@@ -68,6 +68,27 @@ const configSchema = convict({
       default: 'http://localhost:5173',
       env: 'FRONTEND_URL'
     }
+  },
+  notion: {
+    enabled: {
+      doc: 'Enable Notion integration',
+      format: Boolean,
+      default: true,
+      env: 'NOTION_ENABLED'
+    },
+    apiKey: {
+      doc: 'Notion API key for personal workspace',
+      format: String,
+      default: '',
+      env: 'NOTION_API_KEY',
+      sensitive: true
+    },
+    databaseId: {
+      doc: 'Notion database ID to search in (optional)',
+      format: String,
+      default: '',
+      env: 'NOTION_DATABASE_ID'
+    }
   }
 });
 
@@ -77,6 +98,11 @@ configSchema.validate({ allowed: 'strict' });
 // Validation des secrets (seulement en production)
 if (configSchema.get('env') !== 'test' && !configSchema.get('groq.apiKey')) {
   throw new Error('GROQ_API_KEY is required. Please set it in your .env file.');
+}
+
+// Validation de la clé API Notion si l'intégration est activée
+if (configSchema.get('notion.enabled') && !configSchema.get('notion.apiKey')) {
+  throw new Error('NOTION_API_KEY is required when Notion integration is enabled. Please set it in your .env file.');
 }
 
 export const config = configSchema.getProperties();

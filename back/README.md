@@ -5,10 +5,11 @@ Backend API pour ShodoBot, un chatbot IA utilisant LangChain et Groq.
 ## 🚀 Fonctionnalités
 
 - **Agent IA** : Utilise LangChain avec le modèle Groq `llama-3.2-3b-preview`
+- **Intégration Notion** : Recherche dans les pages et bases de données Notion via MCP
 - **Historique de conversation** : Gestion en mémoire avec limite configurable
 - **API REST** : Endpoint `/api/message` pour recevoir et traiter les messages
 - **Sécurité** : Validation des messages, protection XSS, rate limiting
-- **Tests complets** : 44 tests couvrant tous les composants
+- **Tests complets** : 51 tests couvrant tous les composants
 
 ## 📋 Prérequis
 
@@ -39,6 +40,11 @@ Backend API pour ShodoBot, un chatbot IA utilisant LangChain et Groq.
    AGENT_MAX_TOKENS=1000
    AGENT_MAX_HISTORY_SIZE=10
    FRONTEND_URL=http://localhost:5173
+   
+   # Configuration Notion (activé par défaut)
+   NOTION_ENABLED=true
+   NOTION_API_KEY=your_notion_api_key_here
+   NOTION_DATABASE_ID=your_database_id_here
    ```
 
 4. **Installer les dépendances** :
@@ -84,7 +90,10 @@ src/
 │   │   └── validation.ts     # Validation des messages
 │   ├── core/                 # Logique de l'agent
 │   │   ├── agent.ts          # Agent IA principal
-│   │   └── historyManager.ts # Gestionnaire d'historique
+│   │   ├── historyManager.ts # Gestionnaire d'historique
+│   │   └── tools/            # Outils de l'agent
+│   │       ├── NotionSearchTool.ts # Outil de recherche Notion
+│   │       └── index.ts      # Export des outils
 │   └── index.ts              # Module principal
 ├── config/                   # Configuration
 │   └── config.ts            # Configuration avec convict

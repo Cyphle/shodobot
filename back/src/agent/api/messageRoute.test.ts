@@ -13,6 +13,10 @@ jest.mock('../../config/config', () => ({
     },
     agent: {
       maxHistorySize: 10,
+    },
+    notion: {
+      enabled: true,
+      apiKey: 'test-notion-api-key'
     }
   }
 }));
