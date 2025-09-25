@@ -2,6 +2,30 @@ import { describe, it, expect, beforeAll, afterAll } from '@jest/globals';
 import Fastify, { FastifyInstance } from 'fastify';
 import { messageRoute } from './messageRoute';
 
+// Mock de la configuration
+jest.mock('../../config/config', () => ({
+  config: {
+    groq: {
+      apiKey: 'test-api-key',
+      model: 'llama-3.2-3b-preview',
+      temperature: 0.7,
+      maxTokens: 1000,
+    },
+    agent: {
+      maxHistorySize: 10,
+    }
+  }
+}));
+
+// Mock de LangChain
+jest.mock('@langchain/groq', () => ({
+  ChatGroq: jest.fn().mockImplementation(() => ({
+    invoke: jest.fn().mockResolvedValue({
+      content: 'Mocked AI response for route test'
+    })
+  }))
+}));
+
 describe('messageRoute', () => {
   let fastify: FastifyInstance;
 
@@ -28,7 +52,7 @@ describe('messageRoute', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
-      expect(body.message).toContain('Ok I received your message');
+      expect(body.message).toContain('Mocked AI response for route test');
       expect(body.data.receivedMessage).toBe(message);
       expect(body.data.timestamp).toBeDefined();
     });

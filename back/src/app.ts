@@ -3,14 +3,15 @@ import cors from '@fastify/cors';
 import helmet from '@fastify/helmet';
 import rateLimit from '@fastify/rate-limit';
 import { agentModule } from './agent';
+import { config } from './config/config';
 
 export default async function app(fastify: FastifyInstance, opts: FastifyPluginOptions) {
   // Enregistrement des plugins de sécurité
   await fastify.register(helmet);
-  await fastify.register(cors, {
-    origin: process.env.FRONTEND_URL || 'http://localhost:5173',
-    credentials: true
-  });
+        await fastify.register(cors, {
+          origin: config.frontend.url,
+          credentials: true
+        });
   await fastify.register(rateLimit, {
     max: 100,
     timeWindow: '1 minute'

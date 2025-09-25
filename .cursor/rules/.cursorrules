@@ -1,4 +1,4 @@
 # General rules
 - Always write unit test of every piece of code you write
 - Make sure that all tests always pass
-
+- Make sure applications always build by building them at the end of each modification that result from a prompt

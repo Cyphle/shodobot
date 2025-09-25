@@ -1,8 +1,6 @@
 import Fastify from 'fastify';
 import app from './app';
-
-const PORT = parseInt(process.env.PORT || '3001', 10);
-const HOST = process.env.HOST || '0.0.0.0';
+import { config } from './config/config';
 
 const fastify = Fastify({
   logger: {
@@ -19,10 +17,11 @@ const fastify = Fastify({
 const start = async () => {
   try {
     await fastify.register(app);
-    await fastify.listen({ port: PORT, host: HOST });
-    console.log(`🚀 Server running on http://${HOST}:${PORT}`);
-    console.log(`📡 Health check: http://${HOST}:${PORT}/health`);
-    console.log(`💬 Chat endpoint: http://${HOST}:${PORT}/api/message`);
+    await fastify.listen({ port: config.server.port, host: config.server.host });
+    console.log(`🚀 Server running on http://${config.server.host}:${config.server.port}`);
+    console.log(`📡 Health check: http://${config.server.host}:${config.server.port}/health`);
+    console.log(`💬 Chat endpoint: http://${config.server.host}:${config.server.port}/api/message`);
+    console.log(`🤖 AI Agent: ${config.groq.model} (${config.agent.maxHistorySize} pairs max)`);
   } catch (err) {
     fastify.log.error(err);
     process.exit(1);

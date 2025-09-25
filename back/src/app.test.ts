@@ -1,6 +1,42 @@
 import Fastify, { FastifyInstance } from 'fastify';
 import app from './app';
 
+// Mock de l'agent AI pour les tests d'intégration
+jest.mock('./agent/core/agent', () => ({
+  processMessage: jest.fn().mockResolvedValue('Mocked AI response for integration test')
+}));
+
+// Mock de la configuration
+jest.mock('./config/config', () => ({
+  config: {
+    groq: {
+      apiKey: 'test-api-key',
+      model: 'llama-3.2-3b-preview',
+      temperature: 0.7,
+      maxTokens: 1000,
+    },
+    agent: {
+      maxHistorySize: 10,
+    },
+    frontend: {
+      url: 'http://localhost:5173'
+    },
+    server: {
+      port: 3001,
+      host: '0.0.0.0'
+    }
+  }
+}));
+
+// Mock de LangChain
+jest.mock('@langchain/groq', () => ({
+  ChatGroq: jest.fn().mockImplementation(() => ({
+    invoke: jest.fn().mockResolvedValue({
+      content: 'Mocked AI response for integration test'
+    })
+  }))
+}));
+
 describe('App Integration', () => {
   let fastify: FastifyInstance;
 
@@ -43,7 +79,7 @@ describe('App Integration', () => {
       expect(response.statusCode).toBe(200);
       const body = JSON.parse(response.body);
       expect(body.success).toBe(true);
-      expect(body.message).toContain('Ok I received your message');
+      expect(body.message).toContain('Mocked AI response for integration test');
       expect(body.data.receivedMessage).toBe(message);
       expect(body.data.timestamp).toBeDefined();
     });
