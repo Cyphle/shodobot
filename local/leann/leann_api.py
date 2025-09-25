@@ -167,21 +167,27 @@ async def search(request: SearchRequest):
 
 @app.post("/ask")
 async def ask(request: SearchRequest):
-    """Pose une question aux documents"""
+    """Pose une question aux documents et retourne le contexte pour le LLM"""
     try:
         # Rechercher des documents pertinents
         search_results = await search(request)
         if not search_results["success"]:
             return search_results
         
-        # Simuler une réponse basée sur les résultats
+        # Construire le contexte pour le LLM
         if search_results["data"]:
-            content = " ".join([r.content for r in search_results["data"]])
-            answer = f"Basé sur les documents trouvés: {content[:500]}..."
+            context_parts = []
+            for i, result in enumerate(search_results["data"], 1):
+                context_parts.append(f"Document {i}: {result.title}")
+                context_parts.append(f"Contenu: {result.content}")
+                context_parts.append("---")
+            
+            context = "\n".join(context_parts)
+            answer = f"Voici les informations trouvées dans vos documents:\n\n{context}"
         else:
-            answer = "Aucun document pertinent trouvé."
+            answer = "Aucun document pertinent trouvé pour répondre à votre question."
         
-        return {"success": True, "data": {"answer": answer}}
+        return {"success": True, "data": {"answer": answer, "context": context if search_results["data"] else ""}}
     except Exception as e:
         return {"success": False, "error": str(e)}
 

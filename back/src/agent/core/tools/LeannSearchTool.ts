@@ -113,23 +113,22 @@ export class LeannSearchTool {
   }
 
   /**
-   * Pose une question aux documents LEANN
+   * Pose une question aux documents LEANN et retourne le contexte pour le LLM
    */
-  public async askQuestion(question: string): Promise<string> {
+  public async askQuestion(question: string): Promise<{ answer: string; context: string }> {
     if (!config.leann.enabled) {
-      return 'LEANN integration is disabled.';
+      return { answer: 'LEANN integration is disabled.', context: '' };
     }
 
     const isConnected = await this.checkConnection();
     if (!isConnected) {
-      return 'LEANN service not available.';
+      return { answer: 'LEANN service not available.', context: '' };
     }
 
     try {
-      const askOptions: LeannAskOptions = {
-        question: question.trim(),
-        context_limit: 5,
-        temperature: 0.7
+      const askOptions = {
+        query: question.trim(),
+        limit: 5
       };
 
       const controller = new AbortController();
@@ -156,11 +155,17 @@ export class LeannSearchTool {
         throw new Error(apiResponse.error || 'LEANN question failed');
       }
 
-      return apiResponse.data?.answer || 'No answer found.';
+      return {
+        answer: apiResponse.data?.answer || 'No answer found.',
+        context: apiResponse.data?.context || ''
+      };
 
     } catch (error) {
       console.error('Error asking LEANN:', error);
-      return 'Sorry, I encountered an error while searching the documents.';
+      return { 
+        answer: 'Sorry, I encountered an error while searching the documents.', 
+        context: '' 
+      };
     }
   }
 
