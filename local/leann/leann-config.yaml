@@ -1,0 +1,76 @@
+# Configuration LEANN pour ShodoBot
+# Documentation: https://github.com/yichuan-w/LEANN
+
+# Configuration de l'index
+index:
+  name: "shodobot-docs"
+  backend: "hnsw"  # ou "diskann" pour de meilleures performances
+  embedding_model: "facebook/contriever"  # Modèle d'embedding
+  graph_degree: 32
+  complexity: 64
+  compact: true
+  recompute: true
+
+# Configuration de la recherche
+search:
+  top_k: 20
+  complexity: 64
+  recompute: true
+  pruning_strategy: "global"
+
+# Configuration du LLM
+llm:
+  provider: "ollama"
+  model: "qwen3:8b"
+  temperature: 0.7
+  max_tokens: 1000
+
+# Configuration des documents
+documents:
+  path: "/app/documents"
+  supported_formats:
+    - ".pdf"
+    - ".txt"
+    - ".md"
+    - ".docx"
+    - ".pptx"
+    - ".py"
+    - ".js"
+    - ".ts"
+    - ".java"
+    - ".cpp"
+    - ".c"
+    - ".cs"
+    - ".go"
+    - ".rs"
+    - ".php"
+    - ".rb"
+    - ".swift"
+    - ".kt"
+    - ".scala"
+    - ".r"
+    - ".m"
+    - ".sql"
+    - ".html"
+    - ".css"
+    - ".xml"
+    - ".json"
+    - ".yaml"
+    - ".yml"
+    - ".toml"
+    - ".ini"
+    - ".cfg"
+    - ".conf"
+
+# Configuration du cache
+cache:
+  enabled: true
+  redis_url: "redis://redis:6379"
+  ttl: 3600  # 1 heure
+
+# Configuration de l'API
+api:
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  timeout: 30
