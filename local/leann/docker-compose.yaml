@@ -1,88 +1,69 @@
 version: '3.8'
 
 services:
-  leann:
+  # Service de base de données vectorielle simple avec Qdrant
+  qdrant:
+    image: qdrant/qdrant:latest
+    container_name: shodobot-qdrant
+    restart: unless-stopped
+    ports:
+      - "6333:6333"  # API Qdrant
+      - "6334:6334"  # Web UI Qdrant
+    volumes:
+      - qdrant_data:/qdrant/storage
+    environment:
+      - QDRANT__SERVICE__HTTP_PORT=6333
+      - QDRANT__SERVICE__GRPC_PORT=6334
+    networks:
+      - shodobot-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:6333/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Service de traitement de documents et API LEANN
+  leann-api:
     image: python:3.11-slim
-    container_name: shodobot-leann
+    container_name: shodobot-leann-api
     restart: unless-stopped
     working_dir: /app
     volumes:
       # Volume bindé pour les documents à indexer
-      - ../rag:/app/documents:ro
-      # Volume persistant pour les index LEANN
-      - leann_indexes:/app/.leann/indexes
-      # Volume pour la configuration
-      - leann_config:/app/.leann
+      - ../../rag:/app/documents:ro
+      # Volume persistant pour les données
+      - leann_data:/app/data
+      # Script Python
+      - ./leann_api.py:/app/leann_api.py
     ports:
       - "8000:8000"  # API LEANN
     environment:
       - PYTHONUNBUFFERED=1
-      - LEANN_DATA_DIR=/app/.leann
+      - QDRANT_HOST=qdrant
+      - QDRANT_PORT=6333
+      - LEANN_DATA_DIR=/app/data
     command: >
       bash -c "
-        pip install leann &&
-        leann build shodobot-docs --docs /app/documents &&
-        leann ask shodobot-docs --llm ollama --model qwen3:8b --interactive
+        pip install qdrant-client fastapi uvicorn python-multipart PyPDF2 python-docx &&
+        python leann_api.py
       "
     networks:
       - shodobot-network
+    depends_on:
+      - qdrant
     healthcheck:
-      test: ["CMD", "leann", "list"]
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
       interval: 30s
       timeout: 10s
       retries: 3
       start_period: 60s
-
-  # Service Ollama pour les modèles LLM locaux
-  ollama:
-    image: ollama/ollama:latest
-    container_name: shodobot-ollama
-    restart: unless-stopped
-    volumes:
-      - ollama_data:/root/.ollama
-    ports:
-      - "11434:11434"
-    environment:
-      - OLLAMA_HOST=0.0.0.0
-    networks:
-      - shodobot-network
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:11434/api/tags"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-      start_period: 60s
-
-  # Service Redis pour le cache des embeddings
-  redis:
-    image: redis:7-alpine
-    container_name: shodobot-redis
-    restart: unless-stopped
-    ports:
-      - "6379:6379"
-    volumes:
-      - redis_data:/data
-    networks:
-      - shodobot-network
-    healthcheck:
-      test: ["CMD", "redis-cli", "ping"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
 
 volumes:
-  leann_indexes:
+  qdrant_data:
     driver: local
-  leann_config:
-    driver: local
-  ollama_data:
-    driver: local
-  redis_data:
+  leann_data:
     driver: local
 
 networks:
   shodobot-network:
     driver: bridge
-    ipam:
-      config:
-        - subnet: 172.20.0.0/16

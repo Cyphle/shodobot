@@ -89,6 +89,32 @@ const configSchema = convict({
       default: '',
       env: 'NOTION_DATABASE_ID'
     }
+  },
+  leann: {
+    enabled: {
+      doc: 'Enable LEANN integration',
+      format: Boolean,
+      default: true,
+      env: 'LEANN_ENABLED'
+    },
+    apiUrl: {
+      doc: 'LEANN API URL',
+      format: String,
+      default: 'http://localhost:8000',
+      env: 'LEANN_API_URL'
+    },
+    indexName: {
+      doc: 'LEANN index name',
+      format: String,
+      default: 'shodobot-docs',
+      env: 'LEANN_INDEX_NAME'
+    },
+    timeout: {
+      doc: 'LEANN API timeout in milliseconds',
+      format: 'int',
+      default: 10000,
+      env: 'LEANN_TIMEOUT'
+    }
   }
 });
 

@@ -17,6 +17,12 @@ jest.mock('../../config/config', () => ({
     notion: {
       enabled: true,
       apiKey: 'test-notion-api-key'
+    },
+    leann: {
+      enabled: true,
+      apiUrl: 'http://localhost:8000',
+      indexName: 'shodobot-docs',
+      timeout: 10000
     }
   }
 }));

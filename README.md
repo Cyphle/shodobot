@@ -84,7 +84,11 @@ shodobot/
 - Configuration Nginx disponible dans `front/nginx.conf`
 - Compatible avec Docker (port non-privilégié)
 
-## 📝 Configuration Notion
+## 📝 Configuration des outils de recherche
+
+ShodoBot peut rechercher dans vos pages Notion personnelles et dans vos documents locaux via LEANN. Voici comment configurer les intégrations :
+
+## 🔍 Configuration Notion
 
 ShodoBot peut rechercher dans vos pages Notion personnelles. Voici comment configurer l'intégration :
 
@@ -139,12 +143,72 @@ Une fois configuré, testez dans le chat :
 - `"liste les pages Notion"`
 - `"trouve les documents sur mon projet"`
 
-### 🔍 Formats supportés par Notion
+## 📄 Configuration LEANN (Base de données vectorielle)
 
+ShodoBot peut rechercher dans vos documents locaux (PDF, Markdown, code, etc.) via LEANN. Voici comment configurer :
+
+### 1. Démarrer LEANN
+
+```bash
+cd local/leann
+./start-leann.sh up
+```
+
+### 2. Ajouter vos documents
+
+Placez vos documents dans le dossier `rag/` :
+
+```bash
+# Exemple de structure
+rag/
+├── documents/
+│   ├── mon_document.pdf
+│   ├── notes.md
+│   └── code/
+│       └── mon_projet.py
+```
+
+### 3. Indexer les documents
+
+```bash
+./start-leann.sh build my_docs_index
+```
+
+### 4. Tester la recherche
+
+```bash
+# Recherche interactive
+./start-leann.sh interactive my_docs_index
+
+# Recherche simple
+./start-leann.sh search my_docs_index "machine learning"
+
+# Poser une question
+./start-leann.sh ask my_docs_index "Qu'est-ce que ce document explique ?"
+```
+
+### 5. Utiliser dans le chat
+
+Une fois LEANN démarré et indexé, testez dans le chat :
+
+- "recherche document local"
+- "trouve les fichiers sur python"
+- "cherche dans mes documents"
+
+### 🔍 Formats supportés
+
+**Notion :**
 - **Pages** : Titre, contenu, propriétés
 - **Bases de données** : Entrées et propriétés
 - **Blocs** : Titres, listes, code, citations
 - **Contenu riche** : Texte formaté, liens, images
+
+**LEANN (Documents locaux) :**
+- **PDF** : Documents, rapports, articles
+- **Markdown** : Notes, documentation
+- **Code** : Python, TypeScript, JavaScript, etc.
+- **Office** : Word, PowerPoint, Excel
+- **Texte** : TXT, RTF
 
 ### ⚠️ Permissions requises
 

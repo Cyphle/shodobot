@@ -3,12 +3,14 @@ import { HumanMessage, AIMessage, SystemMessage } from '@langchain/core/messages
 import { config } from '../../config/config';
 import { HistoryManager } from './historyManager';
 import { NotionSearchTool } from './tools/NotionSearchTool';
+import { LeannSearchTool } from './tools/LeannSearchTool';
 import { Message } from '../../types/chat';
 
 // Instance globale de l'agent
 let agent: ChatGroq | null = null;
 let historyManager: HistoryManager | null = null;
 let notionTool: NotionSearchTool | null = null;
+let leannTool: LeannSearchTool | null = null;
 
 /**
  * Initialise l'agent Groq
@@ -46,6 +48,16 @@ function initializeNotionTool(): NotionSearchTool | null {
 }
 
 /**
+ * Initialise l'outil LEANN
+ */
+function initializeLeannTool(): LeannSearchTool | null {
+  if (config.leann.enabled && !leannTool) {
+    leannTool = new LeannSearchTool();
+  }
+  return leannTool;
+}
+
+/**
  * Traite un message avec l'agent AI
  */
 export async function processMessage(message: string): Promise<string> {
@@ -53,6 +65,7 @@ export async function processMessage(message: string): Promise<string> {
     const groqAgent = initializeAgent();
     const history = initializeHistoryManager();
     const notion = initializeNotionTool();
+    const leann = initializeLeannTool();
 
     // Créer le message utilisateur
     const userMessage: Message = {
@@ -65,10 +78,21 @@ export async function processMessage(message: string): Promise<string> {
     // Ajouter le message à l'historique
     history.addMessage(userMessage);
 
-    // Détecter si l'utilisateur demande une recherche Notion
-    const notionKeywords = ['notion', 'recherche', 'cherche', 'trouve', 'document', 'page', 'liste', 'wiki', 'espace'];
-    const shouldSearchNotion = notion && notionKeywords.some(keyword => 
-      message.toLowerCase().includes(keyword)
+    // Détecter les mots-clés pour les outils de recherche
+    const notionKeywords = ['notion', 'wiki', 'espace', 'page notion'];
+    const leannKeywords = ['document', 'fichier', 'local', 'rag', 'pdf', 'markdown', 'code'];
+    const searchKeywords = ['recherche', 'cherche', 'trouve', 'liste', 'montre'];
+    
+    const shouldSearchNotion = notion && (
+      notionKeywords.some(keyword => message.toLowerCase().includes(keyword)) ||
+      (searchKeywords.some(keyword => message.toLowerCase().includes(keyword)) && 
+       !leannKeywords.some(keyword => message.toLowerCase().includes(keyword)))
+    );
+    
+    const shouldSearchLeann = leann && (
+      leannKeywords.some(keyword => message.toLowerCase().includes(keyword)) ||
+      (searchKeywords.some(keyword => message.toLowerCase().includes(keyword)) && 
+       !notionKeywords.some(keyword => message.toLowerCase().includes(keyword)))
     );
 
     let notionResults = '';
@@ -107,9 +131,57 @@ export async function processMessage(message: string): Promise<string> {
       }
     }
 
+    let leannResults = '';
+    if (shouldSearchLeann) {
+      try {
+        // Utiliser le message complet comme requête de recherche
+        const searchQuery = message.trim();
+        console.log('🔍 Recherche LEANN pour:', searchQuery);
+        
+        const results = await leann!.searchAll(searchQuery, 10);
+        console.log('📊 Nombre de résultats LEANN:', results.length);
+        
+        if (results.length > 0) {
+          leannResults = '\n\n📄 **Résultats de recherche dans les documents locaux:**\n\n';
+          results.forEach((result, index) => {
+            leannResults += `**${index + 1}. ${result.title}**\n`;
+            leannResults += `   • Score: ${(result.score * 100).toFixed(1)}%\n`;
+            if (result.metadata?.file_path) {
+              leannResults += `   • Fichier: ${result.metadata.file_path}\n`;
+            }
+            if (result.url && result.url !== '#') {
+              leannResults += `   • URL: ${result.url}\n`;
+            }
+            if (result.content) {
+              // Préserver les retours à la ligne dans le contenu
+              const formattedContent = result.content
+                .substring(0, 300)
+                .replace(/\n/g, '\n      ') // Indenter les nouvelles lignes
+                .trim();
+              leannResults += `   • Contenu:\n      ${formattedContent}...\n`;
+            }
+            leannResults += '\n';
+          });
+        } else {
+          leannResults = '\n\n📄 **Aucun document local trouvé pour cette recherche.**\n';
+          leannResults += '💡 Vérifiez que LEANN est démarré et que des documents sont indexés.\n';
+        }
+      } catch (error) {
+        console.error('Error searching LEANN:', error);
+        leannResults = '\n\n📄 Erreur lors de la recherche dans les documents locaux: ' + (error instanceof Error ? error.message : String(error));
+      }
+    }
+
     // Préparer les messages pour LangChain
-    const systemPrompt = 'Tu es ShodoBot, un assistant IA utile et amical. Tu réponds en français de manière concise et professionnelle.' + 
-      (notion ? ' Tu peux rechercher dans Notion quand l\'utilisateur le demande.' : '');
+    let systemPrompt = 'Tu es ShodoBot, un assistant IA utile et amical. Tu réponds en français de manière concise et professionnelle.';
+    
+    if (notion) {
+      systemPrompt += ' Tu peux rechercher dans Notion quand l\'utilisateur le demande.';
+    }
+    
+    if (leann) {
+      systemPrompt += ' Tu peux également rechercher dans les documents locaux quand l\'utilisateur le demande.';
+    }
     
     const messages = [
       new SystemMessage(systemPrompt),
@@ -124,10 +196,15 @@ export async function processMessage(message: string): Promise<string> {
     const response = await groqAgent.invoke(messages);
     let aiResponse = response.content as string;
 
-    // Ajouter les résultats Notion si disponibles
-    if (notionResults) {
-      aiResponse += notionResults;
-    }
+      // Ajouter les résultats Notion si disponibles
+      if (notionResults) {
+        aiResponse += notionResults;
+      }
+      
+      // Ajouter les résultats LEANN si disponibles
+      if (leannResults) {
+        aiResponse += leannResults;
+      }
 
     // Créer le message de l'assistant
     const assistantMessage: Message = {
@@ -170,5 +247,15 @@ export async function closeNotionTool(): Promise<void> {
   if (notionTool) {
     await notionTool.disconnect();
     notionTool = null;
+  }
+}
+
+/**
+ * Ferme l'outil LEANN
+ */
+export async function closeLeannTool(): Promise<void> {
+  if (leannTool) {
+    await leannTool.disconnect();
+    leannTool = null;
   }
 }
