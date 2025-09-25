@@ -37,7 +37,7 @@ const configSchema = convict({
     model: {
       doc: 'Groq model to use',
       format: String,
-      default: 'llama-3.2-3b-preview',
+      default: 'llama-3.1-8b-instant',
       env: 'AGENT_MODEL'
     },
     temperature: {
@@ -64,7 +64,7 @@ const configSchema = convict({
   frontend: {
     url: {
       doc: 'Frontend URL for CORS',
-      format: 'url',
+      format: String,
       default: 'http://localhost:5173',
       env: 'FRONTEND_URL'
     }

@@ -51,6 +51,7 @@ Backend API pour ShodoBot, un chatbot IA utilisant LangChain et Groq.
 ### Développement
 ```bash
 npm run dev
+# Utilise ts-node pour exécuter directement les fichiers TypeScript
 ```
 
 ### Production
@@ -89,8 +90,7 @@ src/
 │   └── config.ts            # Configuration avec convict
 ├── types/                    # Types TypeScript
 │   └── chat.ts              # Types pour les messages
-├── app.ts                   # Application Fastify
-└── server.ts                # Point d'entrée
+└── app.ts                   # Application Fastify (point d'entrée)
 ```
 
 ## 🔧 API Endpoints

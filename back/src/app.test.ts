@@ -1,5 +1,5 @@
 import Fastify, { FastifyInstance } from 'fastify';
-import app from './app';
+import { configureApp } from './app';
 
 // Mock de l'agent AI pour les tests d'intégration
 jest.mock('./agent/core/agent', () => ({
@@ -41,8 +41,10 @@ describe('App Integration', () => {
   let fastify: FastifyInstance;
 
   beforeAll(async () => {
-    fastify = Fastify();
-    await fastify.register(app);
+    fastify = Fastify({
+      logger: false
+    });
+    await configureApp(fastify);
     await fastify.ready();
   });
 

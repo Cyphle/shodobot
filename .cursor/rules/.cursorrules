@@ -2,3 +2,4 @@
 - Always write unit test of every piece of code you write
 - Make sure that all tests always pass
 - Make sure applications always build by building them at the end of each modification that result from a prompt
+- After your checks that every works fine, stop the processes that you launched, especially the applications in order to free the ports
