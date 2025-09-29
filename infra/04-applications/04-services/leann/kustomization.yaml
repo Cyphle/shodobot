@@ -1,0 +1,17 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: shodobot
+
+resources:
+  - 01-configmap.yaml
+  - 02-pvc-qdrant.yaml
+  - 03-pvc-documents.yaml
+  - 04-qdrant-deployment.yaml
+  - 05-qdrant-service.yaml
+  - 06-leann-deployment.yaml
+  - 07-leann-service.yaml
+
+commonLabels:
+  app.kubernetes.io/name: leann
+  app.kubernetes.io/part-of: shodobot

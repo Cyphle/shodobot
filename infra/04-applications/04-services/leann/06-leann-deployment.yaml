@@ -1,0 +1,69 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: leann-api
+  labels:
+    app: leann-api
+  namespace: shodobot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: leann-api
+  template:
+    metadata:
+      labels:
+        app: leann-api
+    spec:
+      containers:
+        - name: leann-api
+          image: rg.fr-par.scw.cloud/shodobot/leann-api:latest
+          ports:
+            - name: http
+              containerPort: 8000
+          envFrom:
+            - configMapRef:
+                name: leann-config
+          volumeMounts:
+            - name: documents-storage
+              mountPath: /app/documents
+              readOnly: true
+            - name: leann-data
+              mountPath: /app/data
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+          startupProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "256m"
+            limits:
+              memory: "1Gi"
+              cpu: "1000m"
+      volumes:
+        - name: documents-storage
+          persistentVolumeClaim:
+            claimName: leann-documents
+        - name: leann-data
+          emptyDir: {}

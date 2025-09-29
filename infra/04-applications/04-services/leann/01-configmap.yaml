@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: leann-config
+  namespace: shodobot
+data:
+  QDRANT_HOST: "qdrant"
+  QDRANT_PORT: "6333"
+  LEANN_DATA_DIR: "/app/data"
+  DOCUMENTS_DIR: "/app/documents"
+  COLLECTION_NAME: "shodobot-docs"
+  PYTHONUNBUFFERED: "1"
