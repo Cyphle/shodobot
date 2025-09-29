@@ -1,43 +1,46 @@
-# Build stage
-FROM node:18-alpine AS builder
+# ---- Build Stage ----
+FROM node:20-alpine AS builder
 
 WORKDIR /app
 
-# Copy package files
-COPY package*.json ./
+# Copier les fichiers de configuration des dépendances
+COPY package.json yarn.lock ./
 
-# Install dependencies
-RUN npm ci --only=production
+# Installer toutes les dépendances (dev + prod)
+RUN yarn install --frozen-lockfile
 
-# Copy source code
-COPY . .
+# Copier le code source
+COPY tsconfig.json ./
+COPY src ./src
 
-# Build the application
-RUN npm run build
+# Compiler TypeScript
+RUN yarn build
 
-# Production stage
-FROM node:18-alpine AS production
-
-# Create non-root user
-RUN addgroup -g 1001 -S nodejs && \
-    adduser -S nodejs -u 1001
+# ---- Production Stage ----
+FROM node:20-alpine AS prod
 
 WORKDIR /app
 
-# Copy built application and dependencies
-COPY --from=builder --chown=nodejs:nodejs /app/dist ./dist
-COPY --from=builder --chown=nodejs:nodejs /app/node_modules ./node_modules
-COPY --from=builder --chown=nodejs:nodejs /app/package*.json ./
+# Copier seulement les fichiers nécessaires depuis l'étape de build
+COPY --from=builder /app/dist ./dist
+COPY --from=builder /app/node_modules ./node_modules
+COPY --from=builder /app/package.json ./package.json
 
-# Switch to non-root user
-USER nodejs
+# Créer un utilisateur non-root pour la sécurité
+RUN addgroup --system appgroup && adduser --system --ingroup appgroup appuser
 
-# Expose port
+# Changer la propriété des fichiers
+RUN chown -R appuser:appgroup /app
+
+# Passer à l'utilisateur non-root
+USER appuser
+
+# Exposer le port
 EXPOSE 3001
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3001/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) })"
+# Variables d'environnement par défaut
+ENV NODE_ENV=production
+ENV PORT=3001
 
-# Start the application
-CMD ["node", "dist/server.js"]
+# Commande de démarrage
+CMD ["node", "dist/app.js"]
