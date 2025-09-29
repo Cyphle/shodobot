@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shodobot-back
+  labels:
+    app: shodobot-back
+  namespace: shodobot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shodobot-back
+  template:
+    metadata:
+      labels:
+        app: shodobot-back
+    spec:
+      containers:
+        - name: shodobot-back
+          image: rg.fr-par.scw.cloud/shodobot/shodobot-back:latest
+          ports:
+            - name: http
+              containerPort: 8080
+          env:
+            - name: NODE_ENV
+              value: "production"
+            - name: GROQ_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: shodobot-secrets
+                  key: GROQ_API_KEY
+          livenessProbe:
+            httpGet:
+              path: /health/live
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 30
+            timeoutSeconds: 10
+            failureThreshold: 3
+
+          readinessProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 3
+
+          startupProbe:
+            httpGet:
+              path: /health/ready
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 5
+            failureThreshold: 30
+
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "256m"
+            limits:
+              memory: "1Gi"

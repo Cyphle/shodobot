@@ -1,0 +1,37 @@
+name: Deploy Shodobot Front
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'SHA1 à déployer'
+        required: true
+        default: 'latest'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_PATH: ${{ vars.CONTAINER_REGISTRY_ENDPOINT }}/shodobot/shodobot-front
+      DEPLOYMENT_NAME: "01-deployment.yaml"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Kubectl
+        uses: azure/k8s-set-context@v1
+        with:
+          kubeconfig: ${{ secrets.KUBECONFIG }}
+
+      - name: Patch image tag in manifest
+        run: |
+          sed -i "s|${{ env.IMAGE_PATH }}:.*|${{ env.IMAGE_PATH }}:${{ github.event.inputs.version }}|" infra/04-applications/04-services/shodobot-front/${{ env.DEPLOYMENT_NAME }}
+        working-directory: .
+
+      - name: Apply Kubernetes manifest
+        run: |
+          cd infra/04-applications/05-services/shodobot-front
+          kubectl apply -n shodobot -f ${{ env.DEPLOYMENT_NAME }}
+          kubectl rollout status deployment/shodobot-front --namespace shodobot --timeout=120s
