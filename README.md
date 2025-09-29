@@ -17,6 +17,7 @@ This bot is a starter and a proof of concept that demonstrate the building of a 
 - Folder `infra`: contains Terraform scripts to deploy on Scaleway
 
 ## How to deploy
+This application can be deployed anywhere. There is a deployment example to deploy it on Scaleway Kapsule which is a managed Kubernetes. However, I did not test it but it should work as it is inspired from a working personal project :)
 
 ## What's missing for prod ready application
 - Observability : 
@@ -29,9 +30,12 @@ This bot is a starter and a proof of concept that demonstrate the building of a 
 - Finops
 
 ## How to contribute
+Do what you want :-)
 
+## Improvement
+I did not have enough time to make LEANN work properly. What is missing is that you can search in LEANN using its vector database but it is not used as a RAG for the LangChain agent. Results of search should be put in the agent context.
 
-## 🚀 Démarrage rapide
+## CURSOR GENERATED INSTRUCTIONS
 
 ### Installation
 ```bash
