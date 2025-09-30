@@ -1,0 +1,28 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: shodobot-front
+  labels:
+    app: shodobot-front
+  namespace: shodobot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: shodobot-front
+  template:
+    metadata:
+      labels:
+        app: shodobot-front
+    spec:
+      containers:
+        - name: shodobot-front
+          image: rg.fr-par.scw.cloud/shodobot/shodobot-front:latest
+          ports:
+            - containerPort: 8080
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 5
+            periodSeconds: 10

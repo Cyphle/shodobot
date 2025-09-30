@@ -1,0 +1,55 @@
+# ShodoBot Frontend - Règles de développement
+
+## Architecture et Structure
+
+- Utiliser React 18 avec TypeScript
+- Suivre les patterns de composition avec des hooks personnalisés
+- Organiser les composants par fonctionnalité dans des dossiers séparés
+- Utiliser des interfaces TypeScript strictes pour tous les props et états
+
+## Styling
+
+- Utiliser Tailwind CSS pour tous les styles
+- Préférer les classes utilitaires aux styles personnalisés
+- Maintenir une cohérence visuelle avec un design system simple
+- Utiliser des couleurs cohérentes (bleu pour les actions principales)
+
+## Gestion d'état
+
+- Utiliser TanStack Query pour la gestion des données serveur
+- Créer des hooks personnalisés pour la logique métier complexe
+- Éviter le prop drilling en utilisant des contextes si nécessaire
+
+## Composants
+
+- Créer des composants réutilisables et modulaires
+- Utiliser des interfaces TypeScript pour les props
+- Préférer les composants fonctionnels avec hooks
+- Nommer les composants de manière descriptive
+
+## Code Quality
+
+- Utiliser ESLint et Prettier pour la cohérence du code
+- Éviter les imports React inutiles (React 17+)
+- Utiliser des noms de variables et fonctions explicites
+- Commenter le code complexe
+
+## Performance
+
+- Utiliser React.memo pour les composants coûteux
+- Implémenter la virtualisation pour les longues listes
+- Optimiser les re-renders avec useCallback et useMemo
+- Lazy loading des composants lourds
+
+## Tests
+
+- Écrire des tests unitaires pour les hooks personnalisés
+- Tester les interactions utilisateur critiques
+- Utiliser React Testing Library pour les tests de composants
+
+## Accessibilité
+
+- Utiliser des éléments sémantiques HTML
+- Implémenter la navigation au clavier
+- Ajouter des attributs ARIA quand nécessaire
+- Tester avec des lecteurs d'écran

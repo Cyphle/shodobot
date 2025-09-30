@@ -1,0 +1,25 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: shodobot-api-ingress
+  annotations:
+    cert-manager.io/cluster-issuer: "letsencrypt-prod"
+    nginx.ingress.kubernetes.io/rewrite-target: /
+  namespace: shodobot
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - api.shodobot.io
+      secretName: shodobot-api-tls
+  rules:
+    - host: api.shodobot.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: shodobot-back
+                port:
+                  number: 80

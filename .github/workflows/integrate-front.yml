@@ -1,0 +1,55 @@
+name: Build and push Shodobot front to ECR
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    env:
+      ECR_NAMESPACE: shodobot
+      IMAGE_NAME: shodobot-front
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Use Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22.18.0
+
+      - name: Install dependencies
+        run: |
+          cd front
+          yarn install
+
+      - name: Run tests
+        run: yarn test
+
+      - name: Login to Scaleway Container Registry
+        uses: docker/login-action@v3
+        with:
+          username: nologin
+          password: ${{ secrets.SCW_SECRET_KEY }}
+          registry: ${{ vars.CONTAINER_REGISTRY_ENDPOINT }}
+
+      - name: Build the Docker image
+        run: |
+          cd front
+          docker build . -t ${{ vars.CONTAINER_REGISTRY_ENDPOINT }}/${{ env.ECR_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Tag image as latest
+        run: |
+          cd front
+          docker tag ${{ vars.CONTAINER_REGISTRY_ENDPOINT }}/${{ env.ECR_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }} ${{ vars.CONTAINER_REGISTRY_ENDPOINT }}/${{ env.ECR_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest
+
+      - name: Push the Docker Image with SHA tag
+        run: |
+          cd front
+          docker push ${{ vars.CONTAINER_REGISTRY_ENDPOINT }}/${{ env.ECR_NAMESPACE }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Push the Docker Image with latest tag
+        run: |
+          cd front
+          docker push ${{ vars.CONTAINER_REGISTRY_ENDPOINT }}/${{ env.ECR_NAMESPACE }}/${{ env.IMAGE_NAME }}:latest

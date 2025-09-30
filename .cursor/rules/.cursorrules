@@ -1,0 +1,9 @@
+# General rules
+- Always write unit test of every piece of code you write
+- Make sure that all tests always pass
+- Make sure applications always build by building them at the end of each modification that result from a prompt
+- After your checks that every works fine, stop the processes that you launched, especially the applications in order to free the ports
+- ALWAYS check for running processes on ports before starting new ones (use `lsof -i:PORT` to check)
+- ALWAYS kill processes properly before starting new ones (use `kill -9 PID` or `lsof -ti:PORT | xargs kill -9`)
+- NEVER leave background processes running after completing a task
+- ALWAYS verify ports are free before starting servers

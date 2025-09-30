@@ -1,93 +1,305 @@
-# Shodobot
+# ShodoBot
 
+This bot is a little application for Shodo. It serves as a bot to help searching for information at Shodo. Next features will depend on the futur contributions.
 
+This bot is a starter and a proof of concept that demonstrate the building of a AI Agent.
 
-## Getting started
+## Used technologies
+- NodeJS : As a main server technology
+- LangChain : As AI framework
+- ReactJS : As a frontend technology
+- NotionMCP : As MCP server for data source
+- LEANN : As vector database for RAG
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+## Architecture
+- Folder `front`: contains de frontend
+- Folder `back`: contains the NodeJS backend and the agent
+- Folder `infra`: contains Terraform scripts to deploy on Scaleway
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+## How to deploy
+This application can be deployed anywhere. There is a deployment example to deploy it on Scaleway Kapsule which is a managed Kubernetes. However, I did not test it but it should work as it is inspired from a working personal project :)
 
-## Add your files
+## What's missing for prod ready application
+- Observability : 
+* standard KPIs, see OpenTelemetry as starter
+* LLM usage KPIs
+- Security :
+* Intrusion detection
+* Supply chain attack checks (MD5, etc)
+* AI security like Guardrails
+- Finops
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/topics/git/add_files/#add-files-to-a-git-repository) or push an existing Git repository with the following command:
+## How to contribute
+Do what you want :-)
+
+## Improvement
+I did not have enough time to make LEANN work properly. What is missing is that you can search in LEANN using its vector database but it is not used as a RAG for the LangChain agent. Results of search should be put in the agent context.
+
+## CURSOR GENERATED INSTRUCTIONS
+
+### Installation
+```bash
+# Backend
+cd back && npm install
+
+# Frontend
+cd front && npm install
+```
+
+### Développement (Frontend + Backend)
+```bash
+# Option 1: Script automatique
+./start-dev.sh
+
+# Option 2: Manuel (2 terminaux)
+# Terminal 1 - Backend
+cd back && npm run dev
+
+# Terminal 2 - Frontend  
+cd front && npm run dev
+```
+
+## 🛠️ Technologies
+
+### Frontend
+- **React 18** - Bibliothèque UI
+- **TypeScript** - Langage de programmation
+- **Vite** - Build tool
+- **Ant Design** - Composants UI
+- **TanStack Query** - Gestion d'état serveur
+- **Vitest** - Tests unitaires
+
+### Backend
+- **Node.js** - Runtime JavaScript
+- **TypeScript** - Langage de programmation
+- **Fastify** - Framework web rapide
+- **Jest** - Framework de tests
+
+## 📁 Architecture
 
 ```
-cd existing_repo
-git remote add origin https://gitlab.com/shodo.io/shodobot.git
-git branch -M main
-git push -uf origin main
+shodobot/
+├── front/              # Frontend React
+│   └── nginx.conf      # Configuration Nginx pour production
+├── back/               # Backend Fastify
+│   ├── src/
+│   │   ├── agent/      # Module agent IA
+│   │   │   ├── core/   # Logique de l'agent
+│   │   │   │   └── tools/  # Outils (Notion, LEANN)
+│   │   │   ├── api/    # Routes API
+│   │   │   └── middleware/  # Middleware de sécurité
+│   │   └── config/     # Configuration
+│   └── .env            # Variables d'environnement
+├── rag/                # Documents pour LEANN
+├── local/              # Infrastructure locale
+│   └── leann/          # Configuration LEANN
+│       ├── docker-compose.yaml
+│       ├── leann-config.yaml
+│       └── start-leann.sh
+└── README.md
 ```
 
-## Integrate with your tools
+## 🌐 Endpoints
 
-- [ ] [Set up project integrations](https://gitlab.com/shodo.io/shodobot/-/settings/integrations)
+- **Frontend**: http://localhost:5173
+- **Backend API**: http://localhost:3001
+  - `POST /api/message` - Envoi de messages
+  - `GET /health` - État du serveur
 
-## Collaborate with your team
+## 🔧 Configuration
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Set auto-merge](https://docs.gitlab.com/user/project/merge_requests/auto_merge/)
+### Développement local
+- Le frontend utilise un proxy Vite (`/api/*` → `http://localhost:3001`)
+- Pas de CORS nécessaire en local grâce au proxy
 
-## Test and Deploy
+### Production
+- Nginx fera le proxy vers le service backend (port 8080)
+- Configuration Nginx disponible dans `front/nginx.conf`
+- Compatible avec Docker (port non-privilégié)
 
-Use the built-in continuous integration in GitLab.
+## 📝 Configuration des outils de recherche
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing (SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+ShodoBot peut rechercher dans vos pages Notion personnelles et dans vos documents locaux via LEANN. Voici comment configurer les intégrations :
 
-***
+## 🔍 Configuration Notion
 
-# Editing this README
+ShodoBot peut rechercher dans vos pages Notion personnelles. Voici comment configurer l'intégration :
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thanks to [makeareadme.com](https://www.makeareadme.com/) for this template.
+### 1. Créer une intégration Notion
 
-## Suggestions for a good README
+1. **Allez sur [Notion Integrations](https://www.notion.so/my-integrations)**
+2. **Cliquez sur "New integration"**
+3. **Configurez l'intégration :**
+   - **Name** : `ShodoBot` (ou le nom de votre choix)
+   - **Workspace** : Sélectionnez votre workspace
+   - **Type** : Internal
+4. **Cliquez sur "Submit"**
+5. **Copiez la clé API** (commence par `secret_`)
 
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+### 2. Partager vos pages avec l'intégration
 
-## Name
-Choose a self-explaining name for your project.
+**Option A : Partager toutes les pages**
+1. Dans votre intégration, cliquez sur "..." → "Manage"
+2. Dans "Connected pages", cliquez sur "Add pages"
+3. Sélectionnez "All pages" ou ajoutez manuellement vos pages
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+**Option B : Partager page par page**
+1. Ouvrez chaque page de votre workspace
+2. Cliquez sur "Share" (en haut à droite)
+3. Ajoutez l'intégration "ShodoBot"
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+### 3. Configurer ShodoBot
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
+1. **Créez le fichier `.env` dans le dossier `back/` :**
+   ```bash
+   cd back
+   cp .env.example .env
+   ```
 
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
+2. **Ajoutez votre clé API Notion :**
+   ```bash
+   # Dans back/.env
+   GROQ_API_KEY=your_groq_api_key_here
+   NOTION_API_KEY=secret_your_notion_api_key_here
+   NOTION_DATABASE_ID=your_database_id_here  # Optionnel
+   ```
 
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
+3. **Redémarrez le serveur :**
+   ```bash
+   cd back && npm run dev
+   ```
 
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
+### 4. Tester l'intégration
 
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
+Une fois configuré, testez dans le chat :
+- `"recherche notion wiki"`
+- `"liste les pages Notion"`
+- `"trouve les documents sur mon projet"`
 
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
+## 📄 Configuration LEANN (Base de données vectorielle)
 
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
+ShodoBot peut rechercher dans vos documents locaux (PDF, Markdown, code, etc.) via LEANN. Voici comment configurer :
 
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
+### 1. Démarrer LEANN
 
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
+```bash
+cd local/leann
+./start-leann.sh up
+```
 
-## License
-For open source projects, say how it is licensed.
+### 2. Ajouter vos documents
 
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+Placez vos documents dans le dossier `rag/` :
+
+```bash
+# Exemple de structure
+rag/
+├── documents/
+│   ├── mon_document.pdf
+│   ├── notes.md
+│   └── code/
+│       └── mon_projet.py
+```
+
+### 3. Indexer les documents
+
+```bash
+./start-leann.sh build my_docs_index
+```
+
+### 4. Tester la recherche
+
+```bash
+# Recherche interactive
+./start-leann.sh interactive my_docs_index
+
+# Recherche simple
+./start-leann.sh search my_docs_index "machine learning"
+
+# Poser une question
+./start-leann.sh ask my_docs_index "Qu'est-ce que ce document explique ?"
+```
+
+### 5. Utiliser dans le chat
+
+Une fois LEANN démarré et indexé, testez dans le chat :
+
+- "recherche document local"
+- "trouve les fichiers sur python"
+- "cherche dans mes documents"
+
+### 🔍 Formats supportés
+
+**Notion :**
+- **Pages** : Titre, contenu, propriétés
+- **Bases de données** : Entrées et propriétés
+- **Blocs** : Titres, listes, code, citations
+- **Contenu riche** : Texte formaté, liens, images
+
+**LEANN (Documents locaux) :**
+- **PDF** : Documents, rapports, articles
+- **Markdown** : Notes, documentation
+- **Code** : Python, TypeScript, JavaScript, etc.
+- **Office** : Word, PowerPoint, Excel
+- **Texte** : TXT, RTF
+
+### ⚠️ Permissions requises
+
+L'intégration doit avoir accès aux pages pour que la recherche fonctionne. Si vous voyez "Aucun résultat trouvé", vérifiez que :
+1. La clé API est correcte
+2. L'intégration a accès aux pages
+3. Les pages contiennent du contenu textuel
+
+## 🗄️ Base Vectorielle LEANN
+
+ShodoBot peut également rechercher dans vos documents locaux grâce à [LEANN](https://github.com/yichuan-w/LEANN), une base vectorielle ultra-efficace.
+
+### Configuration LEANN
+
+1. **Placez vos documents dans le dossier `rag/` :**
+   ```bash
+   # Formats supportés
+   rag/
+   ├── documents.pdf
+   ├── notes.md
+   ├── code.py
+   ├── presentation.pptx
+   └── data.json
+   ```
+
+2. **Démarrez les services LEANN :**
+   ```bash
+   cd local/leann
+   docker-compose up -d
+   ```
+
+3. **Utilisez LEANN :**
+   ```bash
+   # Mode interactif
+   ./start-leann.sh interactive
+   
+   # Rechercher
+   ./start-leann.sh search "machine learning"
+   
+   # Poser une question
+   ./start-leann.sh ask "Comment fonctionne l'authentification ?"
+   ```
+
+### Avantages de LEANN
+
+- **97% d'économie de stockage** par rapport aux bases vectorielles traditionnelles
+- **Recherche rapide** avec recomputation sélective
+- **100% privé** - tout fonctionne localement
+- **Support multi-format** - documents et code
+
+Voir [local/leann/README.md](local/leann/README.md) pour plus de détails.
+
+## 🧪 Tests
+
+```bash
+# Tests backend
+cd back && npm test
+
+# Tests frontend
+cd front && npm test
+```
