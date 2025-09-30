@@ -4,7 +4,7 @@ This bot is a little application for Shodo. It serves as a bot to help searching
 
 This bot is a starter and a proof of concept that demonstrate the building of a AI Agent.
 
-![Shodobot](https://gitlab.com/shodo.io/shodobot/-/blob/main/shodobot.png)
+![Shodobot](/shodobot.png)
 
 ## Used technologies
 - NodeJS : As a main server technology
